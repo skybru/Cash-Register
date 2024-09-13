@@ -11,23 +11,11 @@ let cid = [
   ['ONE HUNDRED', 100]
 ];
 
-const coinDenomArr = [
-  ["PENNY", 0.01],
-  ["NICKEL", 0.05],
-  ["DIME", 0.10],
-  ["QUARTER", 0.25],
-  ["ONE", 1],
-  ["FIVE", 5],
-  ["TEN", 10],
-  ["TWENTY", 20],
-  ["ONE HUNDRED", 100]
-]
-
 let denominations = [0.01, 0.05, 0.1, 0.25, 1, 5, 10, 20, 100];
 let changeResult = {
   status: "",
   change: []
-};
+}
 
 const changeDueEl = document.getElementById("change-due");
 const inputCash = document.getElementById("cash");
@@ -54,24 +42,35 @@ const calculateChangeDue = () => {
   }
   //o se è inferiore al prezzo
   if (Number(inputCash.value) < price) {
-    alert("Customer does not have money to purchase item(s)");
+    changeDueEl.innerHTML = `<p>Customer does not have money to purchase item(s)</p>`;
     return;
   }
 
   //calcolo il resto e controllo lo stato
   let change = parseFloat(inputCash.value - price).toFixed(2);
   let status = checkStatus(change);
-
+  
   //se lo stato è valido procedo a calcolare le denominazioni da restituire
   if (status) {
     const denomReversed = denominations.slice().reverse();
-    changeDueEl.innerHTML += 
-    `<p>Change due: ${change}</p>`;
+    const cidReversed = cid.slice().reverse();
+    let remainder = 0;
+    let counter = 0;
 
     for (let i = 0; i < denomReversed.length; i++) {
-      
+        remainder = (change % denomReversed[i]).toFixed(2);
+        if (remainder != change) {
+          counter = Math.floor(change / denomReversed[i]);
+          change -= denomReversed[i] * counter; 
+          changeResult.change.push(cidReversed[i][0], denomReversed[i] * counter);
+        } else {          
+          changeResult.change.push(cidReversed[i][0], 0);
+        }
     };
-  }
+  };
+  
+  updateUI(changeResult.status, changeResult.change);
+
 };
 
 const checkStatus = (change) => {
@@ -80,25 +79,35 @@ const checkStatus = (change) => {
   let cidSum = 0;
   const cidReversed = cid.slice().reverse();
   cidReversed.forEach((item) => cidSum += item[1]);
-  console.log(cidSum);
 
   //verifico se il mio cassetto non può restituire il resto necessario
   if (cidSum < change) {
-    changeDueEl.innerHTML = 
-    `<p>Status: INSUFFICIENT_FUNDS</p>`;
+    changeResult.status = "INSUFFICIENT_FUNDS";
+    //changeDueEl.innerHTML = `<p>Status: INSUFFICIENT_FUNDS</p>`;
     return false;
     
   }
   //o se ho appena finito i soldi nel cassetto
   if (cidSum === change) {
-    changeDueEl.innerHTML = 
-    `<p>Status: CLOSED</p>`;
+    changeResult.status = "CLOSED";
+    //changeDueEl.innerHTML = `<p>Status: CLOSED</p>`;
     return false;
   }
 
-  changeDueEl.innerHTML = 
-  `<p>Status: OPEN</p>`;
+  changeResult.status = "OPEN";
+  //changeDueEl.innerHTML = `<p>Status: OPEN</p>`;
   return true;
+};
+
+const updateUI = (status, change) => {
+  console.log("updateUI function:")
+  if (status === "OPEN") {
+    changeDueEl.innerHTML = `<p>Status: ${status}</p>`;
+    changeDueEl.innerHTML += `<p>Change due: ${change}</p>`;
+  } else {
+    changeDueEl.innerHTML = `<p>Status: ${status}</p>`;
+  }
+
 };
 
 purchaseBtn.addEventListener("click", () => {
