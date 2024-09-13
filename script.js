@@ -42,7 +42,8 @@ const calculateChangeDue = () => {
   }
   //o se è inferiore al prezzo
   if (Number(inputCash.value) < price) {
-    changeDueEl.innerHTML = `<p>Customer does not have money to purchase item(s)</p>`;
+    alert("Customer does not have enough money to purchase the item");
+    //changeDueEl.innerHTML = `<p>Customer does not have money to purchase item(s)</p>`;
     return;
   }
 
